@@ -1,0 +1,4 @@
+{"kafka" : {"KAFKA_DIR" : "/usr/local/confluent-5.5.0",
+"KAFKA_CONFIG" : { "bootstrap.servers": "zk01.smartjack.private:9092,zk02.smartjack.private:9092,zk03.smartjack.private:9092",
+    "group.id": "lme-search"
+}}}
