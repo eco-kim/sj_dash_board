@@ -23,14 +23,19 @@ def dateToTimestamp(yr,mon,day):
     timestamp = datetime.timestamp(date)
     return timestamp
 
-def activeUsers(engine, table, t0, t1):
+def timestampToDatetime(timestamp):
+    date = datetime.fromtimestamp(timestamp/1000)
+    return date
+
+def activeUsers(engine, table, t0, t1):  ##t0, t1 : JS scale timestamp 
     query = f"select count(distinct(user_id)) from {table} where timestamp >= {t0} and timestampe <= {t1};"
     with engine.connect() as conn:
         rst = conn.execute(query).fetchone()
     return rst
 
-def apiUsage(engine, table, api, t0, t1):
+def apiUsage(engine, table, api, t0, t1):  ##t0, t1 : JS scale timestamp
     query = f"select count(distinct(id)) from {table} where timestamp >= {t0} and timestampe <= {t1} and api = '{api}';"
     with engine.connect() as conn:
         rst = conn.execute(query).fetchone()
     return rst
+
