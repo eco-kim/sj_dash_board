@@ -3,8 +3,10 @@ import os
 import re
 import json
 import requests
+import jwt
 
-KAFKA_CONFIG = json.load('../config/kafka.json')['kafka']['KAFKA_CONFIG']
+kafkaConfig = json.load('../config/kafka.json')['kafka']['kafkaConfig']
+BASE_DIR = ''
 ##컨슈머, 토픽 복구모듈
 ##덤프모듈 
 
@@ -72,7 +74,7 @@ def loadToMysql(conn, missingLogs):
 
 ## offset lag 체크
 def checkOffsetLag():
-    cmd = f'{KAFKA_DIR}/bin/kafka-consumer-groups --bootstrap-server {KAFKA_CONFIG["bootstrap.servers"]} --group {KAFKA_CONFIG["group.id"]} --describe'
+    cmd = f'{kafkaConfig["KAFKA_DIR"]}/bin/kafka-consumer-groups --bootstrap-server {kafkaConfig["bootstrap.servers"]} --group {kafkaConfig["group.id"]} --describe'
     stream = os.popen(cmd)
     output = stream.read().split('\n')[2]
     data = re.findall(r'[0-9]+', output)
@@ -81,8 +83,8 @@ def checkOffsetLag():
     return currOffset, logEndOffset
 
 ## 컨슈머 재가동
-def consumerRestart():
-    os.system(f'nohup python {BASE_DIR}/lmeSearchLogConsumer.py &')
+def consumerRestart(consumer):
+    os.system(f'nohup python {consumer} & > {BASE_DIR}/nohup.out')
 
 ## 중복체크
 def duplicate(engine):
