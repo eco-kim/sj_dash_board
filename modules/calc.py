@@ -35,7 +35,10 @@ def activeUsers(engine, table, t0, t1):  ##t0, t1 : JS scale timestamp
         df = pd.read_sql_query(query, conn)
     return df
 
-def usageSelect(engine, table, t0, t1, api=None):  ##t0, t1 : JS scale timestamp
+def usageSelect(engine, service, t0, t1, api=None):  ##t0, t1 : JS scale timestamp
+    tableInfo = tables[service]
+    table = f'{tableInfo["schema"]}.{tableInfo["table"]}'
+
     if api is not None:
         query = f"select id, timestamp from {table} where timestamp >= {t0} and timestamp < {t1} and api = '{api}';"
     else:
@@ -117,9 +120,6 @@ def monthlyWindow(t0, t1):
 
 
 def apiDataFrame(service, api=None, windowSize='daily', dateStart=None, dateEnd=None):  ##dateXXX : 조회하려는 기간의 시작~끝 날짜 form : {year: int, month: int, day: int}
-    tableInfo = tables[service]
-    table = f'{tableInfo["schema"]}.{tableInfo["table"]}'
-    
     if dateEnd is None:
         temp = datetime.now()
         temp = datetime(temp.year, temp.month, temp.day)+timedelta(days=1)
@@ -140,7 +140,7 @@ def apiDataFrame(service, api=None, windowSize='daily', dateStart=None, dateEnd=
     t0, t1 = dateToTimestamp(dateStart), dateToTimestamp(dateEnd)
     engine = mysql.createEngine("RnD")
 
-    df = usageSelect(engine, table, t0, t1, api)
+    df = usageSelect(engine, service, t0, t1, api)
 
     engine.dispose()
 
