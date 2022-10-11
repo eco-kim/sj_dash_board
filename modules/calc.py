@@ -6,9 +6,6 @@ import json
 from lib import mysql
 import calendar
 
-##api 호출수, dau, mau 등 계산하는 모듈 들어갈 예정.
-
-##select를 이쪽에 넣을지, lib에 넣을지.
 
 ##req.mon, req.day, req.
 
@@ -28,24 +25,6 @@ def dateToTimestamp(date): ##form : {year: int, month: int, day: int}
 def timestampToDatetime(timestamp): ##JS scale timestamp
     date = datetime.fromtimestamp(timestamp/1000)
     return date
-
-def activeUsers(engine, table, t0, t1):  ##t0, t1 : JS scale timestamp 
-    query = f"select id, user_id, timestamp from {table} where timestamp >= {t0} and timestampe < {t1};"
-    with engine.connect() as conn:
-        df = pd.read_sql_query(query, conn)
-    return df
-
-def usageSelect(engine, service, t0, t1, api=None):  ##t0, t1 : JS scale timestamp
-    tableInfo = tables[service]
-    table = f'{tableInfo["schema"]}.{tableInfo["table"]}'
-
-    if api is not None:
-        query = f"select id, timestamp from {table} where timestamp >= {t0} and timestamp < {t1} and api = '{api}';"
-    else:
-        query = f"select id, timestamp from {table} where timestamp >= {t0} and timestamp < {t1};"
-    with engine.connect() as conn:
-        df = pd.read_sql_query(query, conn)
-    return df
 
 def labelFormat(date):
     label = str(date.year)+'-'+str(date.month).zfill(2)+'-'+str(date.day).zfill(2)
@@ -118,8 +97,7 @@ def monthlyWindow(t0, t1):
 
     return bins, labels
 
-
-def apiDataFrame(service, api=None, windowSize='daily', dateStart=None, dateEnd=None):  ##dateXXX : 조회하려는 기간의 시작~끝 날짜 form : {year: int, month: int, day: int}
+def windowTimestamp(windowSize='daily', dateStart=None, dateEnd=None):
     if dateEnd is None:
         temp = datetime.now()
         temp = datetime(temp.year, temp.month, temp.day)+timedelta(days=1)
@@ -138,22 +116,62 @@ def apiDataFrame(service, api=None, windowSize='daily', dateStart=None, dateEnd=
         dateStart = {'year':temp.year, 'month':temp.month, 'day':temp.day}
 
     t0, t1 = dateToTimestamp(dateStart), dateToTimestamp(dateEnd)
+
+    return t0, t1
+
+def usageCount(service, api=None, windowSize='daily', dateStart=None, dateEnd=None):  ##dateXXX : 조회하려는 기간의 시작~끝 날짜 form : {year: int, month: int, day: int}
+    t0, t1 = windowTimestamp(windowSize, dateStart, dateEnd)
     engine = mysql.createEngine("RnD")
 
-    df = usageSelect(engine, service, t0, t1, api)
+    tableInfo = tables[service]
+    table = f'{tableInfo["schema"]}.{tableInfo["table"]}'
+
+    if api is not None:
+        query = f"select id, timestamp from {table} where timestamp >= {t0} and timestamp < {t1} and api = '{api}';"
+    else:
+        query = f"select id, timestamp from {table} where timestamp >= {t0} and timestamp < {t1};"
+    with engine.connect() as conn:
+        df = pd.read_sql_query(query, conn)
 
     engine.dispose()
 
     if windowSize == 'daily':
         bins, labels = dailyWindow(t0, t1)
-
     elif windowSize == 'weekly':
-        bins, labels = weeklyWindow(t0, t1)
-    
+        bins, labels = weeklyWindow(t0, t1)    
     else:
         bins, labels = monthlyWindow(t0, t1)
     
-    df2 = pd.DataFrame(pd.cut(df.timestamp.values, bins, labels=labels[:-1]).describe().counts)
+    df2 = pd.DataFrame(pd.cut(df.timestamp.values, bins, right=False, labels=labels[:-1]).describe().counts)
     df2 = df2.reset_index()
     df2 = df2.rename(columns={'categories':'date'})
     return df2
+
+
+def activeUsers(service, api=None, windowSize='daily', dateStart=None, dateEnd=None):  ##dateXXX : 조회하려는 기간의 시작~끝 날짜 form : {year: int, month: int, day: int}
+    t0, t1 = windowTimestamp(windowSize, dateStart, dateEnd)
+    engine = mysql.createEngine("RnD")
+
+    tableInfo = tables[service]
+    table = f'{tableInfo["schema"]}.{tableInfo["table"]}'
+
+    query = f"select id, user_id, timestamp from {table} where timestamp >= {t0} and timestamp < {t1};"
+    with engine.connect() as conn:
+        df = pd.read_sql_query(query, conn)
+
+    engine.dispose()
+
+    if windowSize == 'daily':
+        bins, labels = dailyWindow(t0, t1)
+    elif windowSize == 'weekly':
+        bins, labels = weeklyWindow(t0, t1)    
+    else:
+        bins, labels = monthlyWindow(t0, t1)
+
+    df['window'] = pd.cut(df['timestamp'], bins, right=False, labels=labels[:-1])
+    df2 = pd.DataFrame(df.groupby('window').user_id.nunique())
+    df2 = df2.reset_index()
+    df2 = df2.rename(columns={'window':'date','user_id':'counts'})
+
+    return df2
+    
