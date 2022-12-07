@@ -1,4 +1,4 @@
-from confluent_kafka import Consumer, KafkaExceptionx
+from confluent_kafka import Consumer
 import os
 import re
 import json

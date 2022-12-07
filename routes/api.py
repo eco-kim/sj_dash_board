@@ -1,7 +1,5 @@
-from struct import calcsize
-from sys import modules
 from flask import Blueprint, render_template
-from modules import calc
+from commons import calc
 
 ##다운로드는 csv? 
 
