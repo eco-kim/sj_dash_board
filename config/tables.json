@@ -2,5 +2,7 @@
 "kitech_api" : {"schema" : "research",
                 "table"  : "kitech_api_keyword"},
 "lme_search" : {"schema" : "research",
-                "table"  : "lme_search_log_dummy"}
+                "table"  : "lme_search_log"},
+"lms_search" : {"schema" : "research",
+                "table" : "lms_search_log"}
 }

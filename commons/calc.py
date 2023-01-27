@@ -16,11 +16,21 @@ import calendar
 with open('config/tables.json', 'r') as f:
     tables = json.load(f)
 
-def dateToTimestamp(date): ##form : {year: int, month: int, day: int}
-    date = datetime(date['year'], date['month'], date['day'])
-    timestamp = datetime.timestamp(date)
+def dateToTimestamp(date0): ##datetime object
+    timestamp = datetime.timestamp(date0)
     timestamp = int(round(timestamp*1000,0))
     return timestamp ##JS scale
+
+def isoFormatToTimestamp(date0): ##form : "YYYY-MM-DD"
+    day0 = datetime.fromisoformat(date0)
+    timestamp = datetime.timestamp(day0)
+    timestamp = int(round(timestamp*1000,0))
+    return timestamp
+
+def isoFormatToDict(date0): ##form : "YYYY-MM-DD"
+    day0 = date.fromisoformat(date0)
+    t0 = {'year': day0.year, 'month': day0.month, 'day': day0.day}
+    return t0
 
 def timestampToDatetime(timestamp): ##JS scale timestamp
     date = datetime.fromtimestamp(timestamp/1000)
@@ -97,23 +107,22 @@ def monthlyWindow(t0, t1):
 
     return bins, labels
 
-def windowTimestamp(windowSize='daily', dateStart=None, dateEnd=None):
+def windowTimestamp(windowSize='daily', dateStart=None, dateEnd=None): ##datetime
     if dateEnd is None:
         temp = datetime.now()
-        temp = datetime(temp.year, temp.month, temp.day)+timedelta(days=1)
-        dateEnd = {'year':temp.year, 'month':temp.month, 'day':temp.day}
+        dateEnd = datetime(temp.year, temp.month, temp.day)+timedelta(days=1)
 
     if dateStart is None:
         if windowSize == 'daily': #default 30일 조회
-            temp = datetime(dateEnd['year'],dateEnd['month'],dateEnd['day'])-timedelta(days=30)
+            temp = dateEnd-timedelta(days=30)
         
         elif windowSize == 'weekly': ##default 20주 조회
-            temp = datetime(dateEnd['year'],dateEnd['month'],dateEnd['day'])-timedelta(days=140)
+            temp = dateEnd-timedelta(days=140)
 
         elif windowSize == 'monthly': ##defalut 1년 조회, 최대 2년까지만가능
-            temp = datetime(dateEnd['year']-1,dateEnd['month'],dateEnd['day'])
+            temp = dateEnd-timedelta(days=365)
 
-        dateStart = {'year':temp.year, 'month':temp.month, 'day':temp.day}
+        dateStart = temp
 
     t0, t1 = dateToTimestamp(dateStart), dateToTimestamp(dateEnd)
 
