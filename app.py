@@ -220,6 +220,28 @@ def updateLME(window):
     return figure
 
 @app.callback(
+    Output('graph4', 'figure'),
+    Input('datepicker_lms_usage', 'start_date'),
+    Input('datepicker_lms_usage', 'end_date')) 
+def updateLMSUsage(start_date, end_date):
+    global dfs, graphSettings
+    graphSettings['lms_usage']['dateStart'] = start_date
+    graphSettings['lms_usage']['dateEnd'] = end_date
+    dfs['lms_usage'] = lme.usage(graphSettings['lms_usage'])
+    figure = px.bar(dfs['lms_usage'], x="date", y="counts")
+    return figure
+
+@app.callback(
+    Output("graph4","figure"),
+    Input('window_lms_usage',"value"))
+def updateLMS(window):
+    global dfs, graphSettings
+    graphSettings['lms_usage']['windowSize'] = window
+    dfs['lms_usage'] = lme.usage(graphSettings['lms_usage'])
+    figure = px.bar(dfs['lms_usage'], x="date", y="counts")
+    return figure
+
+@app.callback(
     Output("graph2","figure"),
     Input("window2","value"))
 def updateKITECH(window):

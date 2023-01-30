@@ -79,30 +79,30 @@ def monthlyWindow(t0, t1):
     if yr0 == yr1:
         if mon1<=11 :
             for mon in range(mon0, mon1+2):
-                bins.append(dateToTimestamp({'year':yr0,'month':mon,'day':1}))
+                bins.append(dateToTimestamp(datetime(yr0,mon,1)))
                 labels.append(f'{yr0}-{str(mon).zfill(2)}')
         else:
             for mon in range(mon0, 13):
-                bins.append(dateToTimestamp({'year':yr0,'month':mon,'day':1}))
+                bins.append(dateToTimestamp(datetime(yr0,mon,1)))
                 labels.append(f'{yr0}-{str(mon).zfill(2)}')
-            bins.append(dateToTimestamp({'year':yr0+1,'month':1,'day':1}))
+            bins.append(dateToTimestamp(datetime(yr0+1,1,1)))
             labels.append(f'{yr0+1}-{str(1).zfill(2)}')
     else:
         if mon1<=11 :
             for mon in range(mon0, 13):
-                bins.append(dateToTimestamp({'year':yr0,'month':mon,'day':1}))
+                bins.append(dateToTimestamp(datetime(yr0,mon,1)))
                 labels.append(f'{yr0}-{str(mon).zfill(2)}')
             for mon in range(1,mon1+2):
-                bins.append(dateToTimestamp({'year':yr1,'month':mon,'day':1}))
+                bins.append(dateToTimestamp(datetime(yr1,mon,1)))
                 labels.append(f'{yr1}-{str(mon).zfill(2)}')
         else:
             for mon in range(mon0, 13):
-                bins.append(dateToTimestamp({'year':yr0,'month':mon,'day':1}))
+                bins.append(dateToTimestamp(datetime(yr0,mon,1)))
                 labels.append(f'{yr0}-{str(mon).zfill(2)}')
             for mon in range(1, 13):
-                bins.append(dateToTimestamp({'year':yr1,'month':mon,'day':1}))
+                bins.append(dateToTimestamp(datetime(yr1,mon,1)))
                 labels.append(f'{yr1}-{str(mon).zfill(2)}')
-            bins.append(dateToTimestamp({'year':yr1+1,'month':1,'day':1}))
+            bins.append(dateToTimestamp(datetime(yr1+1,1,1)))
             labels.append(f'{yr1+1}-{str(1).zfill(2)}')
 
     return bins, labels
