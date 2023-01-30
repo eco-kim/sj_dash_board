@@ -251,4 +251,4 @@ def updateLMEInstute2(value):
     return figure
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8090)
+    app.run_server(host='0.0.0.0',debug=True, port=8090)
