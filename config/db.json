@@ -1,6 +1,6 @@
 {
 "RnD" :
-    {"host" : "master-dev-rnd.cvtkhht2fxds.ap-northeast-2.rds.amazonaws.com",
+    {"host" : "research-master.cvtkhht2fxds.ap-northeast-2.rds.amazonaws.com",
      "port" : 3306,
      "db" : "master",
      "user" : "smartjack",
