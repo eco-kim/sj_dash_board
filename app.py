@@ -57,13 +57,13 @@ def topNinst(id0):
 
 graphSettings = {'lme_usage':{'windowSize':'daily','dateStart':day0,'dateEnd':day1},
                 'lme_institute':{'top':'15','dateStart':day0,'dateEnd':day1},
-                'kitech_usage':{'windowsize':'daily','dateStart':day0,'dateEnd':day1},
-                'lms_usage':{'windowSize':'daily','dateStart':day0,'dateEnd':day1}}
+                'lms_usage':{'windowSize':'daily','dateStart':day0,'dateEnd':day1},
+                'lms_active':{'windowSize':'daily','dateStart':day0,'dateEnd':day1}}
 
 dfs = {'lme_usage':lme.usage(graphSettings['lme_usage']),
        'lme_institute':lme.institute(graphSettings['lme_institute']),
-       'kitech_usage':kitech.usage(windowSize='daily'),
-       'lms_usage':lms.usage(graphSettings['lms_usage'])}
+       'lms_usage':lms.usage(graphSettings['lms_usage']),
+       'lms_active':lms.activeUsers(graphSettings['lms_active'])}
 
 app.layout = html.Div([
 
@@ -145,6 +145,7 @@ app.layout = html.Div([
         windowsize('window_lms_usage')],
     style = {'position':'relative','zIndex':2}
     ),
+
         
     html.Div(children=[
         dcc.Graph(
@@ -152,28 +153,39 @@ app.layout = html.Div([
             figure = px.bar(dfs['lms_usage'], x="date", y="counts"))],
         style = {'position':'relative','float':'bottom','height':'60%','top':'-60px','zIndex':0}
     )],
-    style={'width':'45%', 'margin':(10,10,10,10)}
+    style={'width':'45%', 'float':'left', 'margin':(10,10,10,10)}
     ),
 
-    html.Div(children=[ 
-    
-        html.H1(children='KITECH API 사용량'),
+    ##lms 사용량    
+    html.Div(children=[
 
-        html.Div(children='''
-            Window Size (일간/주간/월간)
-        '''),
-        dcc.Dropdown(
-            id='window2',
-            options = ['daily','weekly','monthly'],
-            value = 'daily'
-        ),
+    html.H1(children='LMS 활성 유저수',
+        style = {'position':'relative','width':'60%'}),
+
+    ##download button
+    html.Div([
+            html.Button("Download Excel", id='btn_xlsx3'),
+            dcc.Download(id='download-datafram-xlsx3')
+            ],
+            style = {'position':'relative','width':'20%','left':'300px','top':'-55px'}
+    ),
+
+    ##조회기간, window size
+    html.Div(children=[
+        datepicker('datepicker_lms_active'),
+        windowsize('window_lms_active')],
+    style = {'position':'relative','zIndex':2}
+    ),
+
+        
+    html.Div(children=[
         dcc.Graph(
-            id='graph2',
-            figure = px.bar(dfs['kitech_usage'], x="date", y="counts")
-        )],
-   
-    style={'width':'45%', 'float':'bottom', 'margin':(20,20,20,20)})
-
+            id='graph5',
+            figure = px.bar(dfs['lms_active'], x="date", y="counts"))],
+        style = {'position':'relative','float':'bottom','height':'60%','top':'-60px','zIndex':0}
+    )],
+    style={'width':'45%', 'float':'right','margin':(10,10,10,10)}
+    )
 ])
 
 @app.callback(
@@ -242,12 +254,25 @@ def updateLMS(window):
     return figure
 
 @app.callback(
-    Output("graph2","figure"),
-    Input("window2","value"))
-def updateKITECH(window):
-    global dfs
-    dfs['kitech_usage'] = kitech.usage(windowSize=window)
-    figure = px.bar(dfs['kitech_usage'], x="date", y="counts")
+    Output('graph5', 'figure'),
+    Input('datepicker_lms_active', 'start_date'),
+    Input('datepicker_lms_active', 'end_date')) 
+def updateLMSUsage(start_date, end_date):
+    global dfs, graphSettings
+    graphSettings['lms_active']['dateStart'] = start_date
+    graphSettings['lms_active']['dateEnd'] = end_date
+    dfs['lms_active'] = lme.usage(graphSettings['lms_active'])
+    figure = px.bar(dfs['lms_active'], x="date", y="counts")
+    return figure
+
+@app.callback(
+    Output("graph5","figure"),
+    Input('window_lms_active',"value"))
+def updateLMS(window):
+    global dfs, graphSettings
+    graphSettings['lms_active']['windowSize'] = window
+    dfs['lms_active'] = lme.usage(graphSettings['lms_active'])
+    figure = px.bar(dfs['lms_active'], x="date", y="counts")
     return figure
 
 @app.callback(
