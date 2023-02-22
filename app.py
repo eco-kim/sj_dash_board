@@ -164,10 +164,10 @@ app.layout = html.Div([
 
     ##download button
     html.Div([
-            html.Button("Download Excel", id='btn_xlsx3'),
-            dcc.Download(id='download-datafram-xlsx3')
+            html.Button("Download Excel", id='btn_xlsx5'),
+            dcc.Download(id='download-datafram-xlsx5')
             ],
-            style = {'position':'relative','width':'20%','left':'300px','top':'-55px'}
+            style = {'position':'relative','width':'20%','left':'260px','top':'-55px'}
     ),
 
     ##조회기간, window size
@@ -208,6 +208,13 @@ def func(n_clicks):
     prevent_initial_call=True)
 def func(n_clicks):
     return dcc.send_data_frame(dfs['lms_usage'].to_excel, "lms_search_usage.xlsx", sheet_name="사용량")
+
+@app.callback(
+    Output('download-datafram-xlsx5', 'data'),
+    Input('btn_xlsx5', 'n_clicks'),
+    prevent_initial_call=True)
+def func(n_clicks):
+    return dcc.send_data_frame(dfs['lms_active'].to_excel, "lms_search_active.xlsx", sheet_name="활성유저수")
 
 @app.callback(
     Output('graph1', 'figure'),
