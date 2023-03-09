@@ -1,5 +1,3 @@
-# visit http://127.0.0.1:3002/ in your web browser.
-
 from dash import Dash, html, dcc #, Input, Output
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform
 import plotly.express as px
